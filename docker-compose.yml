@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  zabbix-mysql:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PWD}
+    volumes:
+      - mysql:/etc/mysql/conf.d
+    networks:
+      - zabbixnet
+  zabbix-backend:
+    image: zabbix/zabbix-server-mysql:${ZABBIX_VERSION}
+    depends_on:
+      - zabbix-mysql
+    environment:
+      - DB_SERVER_HOST=zabbix-mysql
+      - MYSQL_USER=${MYSQL_USR}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PWD}
+    networks:
+      - zabbixnet
+  zabbix-frontend:
+    image: zabbix/zabbix-web-apache-mysql:${ZABBIX_VERSION}
+    depends_on:
+      - zabbix-mysql
+      - zabbix-backend
+    environment:
+      - DB_SERVER_HOST=zabbix-mysql
+      - MYSQL_USER=${MYSQL_USR}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PWD}
+      - ZBX_SERVER_HOST=zabbix-backend
+      - PHP_TZ=${TIME_ZONE}
+    networks:
+      - zabbixnet
+    ports:
+      - "80:8080"
+
+volumes:
+  mysql:
+
+networks:
+  zabbixnet:
+    driver: bridge
+
