@@ -1,29 +1,46 @@
 version: "3.8"
 
 services:
+
   zabbix-mysql:
     image: mysql:latest
+    container_name: zabbix-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PWD}
     volumes:
       - mysql:/etc/mysql/conf.d
     networks:
       - zabbixnet
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
   zabbix-backend:
     image: zabbix/zabbix-server-mysql:${ZABBIX_VERSION}
+    container_name: zabbix-backend
     depends_on:
-      - zabbix-mysql
+      zabbix-mysql:
+          condition: service_healthy
     environment:
       - DB_SERVER_HOST=zabbix-mysql
       - MYSQL_USER=${MYSQL_USR}
       - MYSQL_PASSWORD=${MYSQL_ROOT_PWD}
     networks:
       - zabbixnet
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "zabbix-mysql"]
+      timeout: 20s
+      retries: 10
+
   zabbix-frontend:
     image: zabbix/zabbix-web-apache-mysql:${ZABBIX_VERSION}
+    container_name: zabbix-frontend
     depends_on:
-      - zabbix-mysql
-      - zabbix-backend
+      zabbix-mysql:
+          condition: service_healthy
+      zabbix-backend:
+          condition: service_healthy
     environment:
       - DB_SERVER_HOST=zabbix-mysql
       - MYSQL_USER=${MYSQL_USR}
