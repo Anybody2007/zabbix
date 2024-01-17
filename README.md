@@ -25,5 +25,10 @@ You can use this ZABBIX server for your small/medium office, so that you can man
 
     Update `.env` as per your requirements. Like changing the `mysql` `root` account `password` and other `password`.
 
-    Also the image 
+    - `MYSQL_ROOT_PWD=zabbix123` you can change in the env file
+    - `ZABBIX_VERSION=trunk-centos` you can change the tag to `trunk-ubuntu` or `trunk-alpine`
+
+         For more details of the other image tags checkout the links - https://hub.docker.com/u/zabbix https://www.zabbix.com/container_images
+    - TIME_ZONE="Asia/Kolkata" change the time zone as per your requirment
+    - MYSQL_USR="root" I have chose the user root because 
 
